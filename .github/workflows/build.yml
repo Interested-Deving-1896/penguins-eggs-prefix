@@ -1,4 +1,4 @@
-name: Build linux-distro-prefix
+name: Build penguins-eggs-prefix
 
 on:
   workflow_dispatch:
@@ -19,9 +19,13 @@ on:
         description: 'Maximum tier to build (1=default, 2=weekly, 3=experimental)'
         required: false
         default: '1'
+      build_iso:
+        description: 'Also produce naked base ISOs (true/false)'
+        required: false
+        default: 'false'
   schedule:
-    # Monthly on the 2nd — offset from linux-distro-stage3 (1st) so stage3 releases are ready
-    - cron: "0 4 2 * *"
+    # Monthly on the 3rd — after linux-distro-prefix (2nd) so base prefix releases are ready
+    - cron: "0 4 3 * *"
   push:
     branches:
       - main
@@ -78,20 +82,26 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build prefix
+        env:
+          BUILD_ISO: ${{ github.event.inputs.build_iso || 'false' }}
         run: |
+          ISO_FLAG=""
+          [[ "$BUILD_ISO" == "true" ]] && ISO_FLAG="--iso"
           sudo ./build.sh \
             --distro  "${{ matrix.distro }}" \
             --release "${{ matrix.release }}" \
             --arch    "${{ matrix.arch }}" \
-            --jobs    "$(nproc)"
+            --jobs    "$(nproc)" \
+            $ISO_FLAG
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux-distro-prefix-${{ matrix.distro }}-${{ matrix.arch }}
+          name: penguins-eggs-prefix-${{ matrix.distro }}-${{ matrix.arch }}
           path: |
-            linux_distro_prefix_${{ matrix.distro }}_${{ matrix.arch }}_*.tar.gz
-            linux_distro_prefix_${{ matrix.distro }}_${{ matrix.arch }}_*.tar.gz.sha256
+            penguins_eggs_prefix_${{ matrix.distro }}_${{ matrix.arch }}_*.tar.gz
+            penguins_eggs_prefix_${{ matrix.distro }}_${{ matrix.arch }}_*.tar.gz.sha256
+            penguins_eggs_prefix_${{ matrix.distro }}_${{ matrix.arch }}_*.iso
           if-no-files-found: error
 
   # ── release ───────────────────────────────────────────────────────────────────
@@ -105,7 +115,7 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: linux-distro-prefix-*
+          pattern: penguins-eggs-prefix-*
           merge-multiple: true
 
       - name: Generate release metadata
@@ -113,9 +123,8 @@ jobs:
         run: |
           DATE=$(date +"%Y%m%d")
           echo "tag=${DATE}" >> "$GITHUB_OUTPUT"
-          echo "name=linux-distro-prefix ${DATE}" >> "$GITHUB_OUTPUT"
-          # Checksums for release body
-          sha256sum linux_distro_prefix_*.tar.gz > SHA256SUMS
+          echo "name=penguins-eggs-prefix ${DATE}" >> "$GITHUB_OUTPUT"
+          sha256sum penguins_eggs_prefix_*.tar.gz > SHA256SUMS
           echo "checksums<<EOF" >> "$GITHUB_OUTPUT"
           cat SHA256SUMS >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
@@ -123,16 +132,17 @@ jobs:
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "linux_distro_prefix_*.tar.gz,linux_distro_prefix_*.tar.gz.sha256,SHA256SUMS"
+          artifacts: "penguins_eggs_prefix_*.tar.gz,penguins_eggs_prefix_*.tar.gz.sha256,penguins_eggs_prefix_*.iso,SHA256SUMS"
           token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
           tag: ${{ steps.meta.outputs.tag }}
           name: ${{ steps.meta.outputs.name }}
           commit: ${{ github.ref_name }}
           body: |
-            Gentoo prefix tarballs for all tier-1 distro/arch combinations.
+            Gentoo prefix tarballs (with penguins-eggs ISO tools) for all tier-1 distro/arch combinations.
 
-            Install to `/usr/local` and run `startprefix` to enter the prefix.
+            Install to `/usr/local` and run `startprefix` to enter the prefix,
+            or use with `eggs produce --prefix` to build a live ISO.
 
             **SHA256 checksums:**
             ```

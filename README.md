@@ -1,86 +1,74 @@
-# linux-distro-prefix
+# penguins-eggs-prefix
 
-A distro-agnostic, architecture-agnostic Gentoo prefix builder.
+Fork of [linux-distro-prefix](https://github.com/Interested-Deving-1896/linux-distro-prefix) with [penguins-eggs](https://github.com/Interested-Deving-1896/penguins-eggs) integration.
 
-Builds a self-contained Gentoo prefix (`/usr/local/gentoo`) on top of any supported Linux distro and CPU architecture. The prefix is independent of the host distro after installation — only the bootstrap chroot depends on the base distro.
+Builds a Gentoo prefix extended with ISO production tools (squashfs-tools, xorriso, grub, syslinux) for use with penguins-eggs. Optionally produces a naked base ISO alongside the prefix tarball.
 
-Stage3 rootfs tarballs are sourced from [linux-distro-stage3](https://github.com/Interested-Deving-1896/linux-distro-stage3) releases.
+Stage3 rootfs tarballs are sourced from linux-distro-stage3. The base Gentoo prefix is pre-seeded from linux-distro-prefix releases when available, skipping the full bootstrap (~1 hour saved).
 
 ## Supported distros and architectures
 
-| Distro | amd64 | arm64 | armhf | riscv64 | ppc64el | s390x | loong64 | i386 |
-|--------|-------|-------|-------|---------|---------|-------|---------|------|
-| Debian | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Ubuntu | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — | ✓ |
-| Devuan | ✓ | ✓ | ✓ | ✓ | ✓ | — | — | ✓ |
-| Arch | ✓ | ✓ | ✓ | ✓ | — | — | — | ✓ |
-| Fedora | ✓ | ✓ | ✓ | — | ✓ | ✓ | — | ✓ |
-| Alpine | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Void | ✓ | ✓ | ✓ | — | ✓ | — | — | ✓ |
-| openSUSE | ✓ | ✓ | ✓ | — | ✓ | ✓ | — | ✓ |
-| Gentoo | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-
-Tier-1 (CI on every push): amd64, arm64, armhf. See `config/matrix.yml` for full tier assignments.
-
-## What the prefix contains
-
-- Gentoo prefix bootstrap stages 1–3 (`bootstrap-prefix.sh`)
-- `app-portage/prefix-toolkit`
-- `startprefix` launcher at `/usr/local/bin/startprefix`
-
-No display stack, no ChromeOS-specific packages. Forks can add those on top.
+Same matrix as linux-distro-prefix — 9 distros x 8 arches. See config/matrix.yml.
 
 ## Building locally
 
-Requirements: root access, `curl`, `coreutils`, ~10 GB free disk space, ~1–2 hours build time.
+Requirements: root access, curl, coreutils, ~10 GB free disk space.
 
-```bash
-git clone https://github.com/Interested-Deving-1896/linux-distro-prefix
-cd linux-distro-prefix
-sudo ./build.sh --distro debian --release trixie --arch amd64
-```
+    git clone https://github.com/Interested-Deving-1896/penguins-eggs-prefix
+    cd penguins-eggs-prefix
 
-Cross-arch builds require `qemu-user-static` (installed automatically on Debian/Ubuntu hosts).
+    # Build prefix tarball only
+    sudo ./build.sh --distro debian --release trixie --arch amd64
+
+    # Build prefix tarball + naked base ISO (requires penguins-eggs on host)
+    sudo ./build.sh --distro debian --release trixie --arch amd64 --iso
 
 ### Options
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--distro` | `debian` | Base distro for bootstrap chroot |
-| `--release` | `trixie` | Distro release |
-| `--arch` | `amd64` | Target architecture |
-| `--output` | `./` | Output directory for tarball |
-| `--jobs` | `nproc` | Parallel jobs |
-| `--stage3` | _(fetched)_ | Path to a local stage3 tarball |
+| Flag       | Default    | Description                                              |
+|------------|------------|----------------------------------------------------------|
+| --distro   | debian     | Base distro for bootstrap chroot                         |
+| --release  | trixie     | Distro release                                           |
+| --arch     | amd64      | Target architecture                                      |
+| --output   | ./         | Output directory                                         |
+| --jobs     | nproc      | Parallel jobs                                            |
+| --stage3   | (fetched)  | Path to a local stage3 tarball                           |
+| --prefix   | (fetched)  | Path to a local linux-distro-prefix tarball              |
+| --iso      | false      | Also produce a naked base ISO via penguins-eggs          |
 
 ### Output
 
-```
-linux_distro_prefix_{distro}_{arch}_{YYYYMMDD}.tar.gz
-linux_distro_prefix_{distro}_{arch}_{YYYYMMDD}.tar.gz.sha256
-linux_distro_prefix_{distro}_{arch}.tar.gz          ← symlink to latest
-```
+    penguins_eggs_prefix_{distro}_{arch}_{YYYYMMDD}.tar.gz
+    penguins_eggs_prefix_{distro}_{arch}_{YYYYMMDD}.tar.gz.sha256
+    penguins_eggs_prefix_{distro}_{arch}.tar.gz          <- symlink to latest
+    penguins_eggs_prefix_{distro}_{arch}_{YYYYMMDD}.iso  <- if --iso
 
-## Installing the prefix
+## Using the prefix with penguins-eggs
 
-```bash
-# Extract to /usr/local (takes ~2 GB)
-sudo tar zxf linux_distro_prefix_debian_amd64_YYYYMMDD.tar.gz -C /usr/local
+    # Extract to /usr/local
+    sudo tar zxf penguins_eggs_prefix_debian_amd64_YYYYMMDD.tar.gz -C /usr/local
 
-# Enter the prefix
-/usr/local/bin/startprefix
-```
+    # Enter the prefix
+    /usr/local/bin/startprefix
+
+    # Or use with eggs produce --prefix
+    sudo eggs produce --prefix
 
 ## Relationship to other projects
 
-```
-linux-distro-stage3   →   linux-distro-prefix   →   penguins-eggs-prefix
-     (stage3 tarballs)         (prefix tarballs)          (prefix + ISO)
-```
-
-- **linux-distro-stage3**: provides the bootstrap chroot base
-- **linux-distro-prefix**: this repo — builds the Gentoo prefix
-- **penguins-eggs-prefix**: fork that adds penguins-eggs integration for ISO production
+    linux-distro-stage3  (stage3 tarballs)
+            |
+            v
+    linux-distro-prefix  (base Gentoo prefix tarballs)
+            |
+            v
+    penguins-eggs-prefix  <- this repo (prefix + ISO production tools)
+            |
+            v
+    penguins-eggs all-features  (eggs produce --prefix)
+            |
+            v
+            ISO
 
 ## License
 
