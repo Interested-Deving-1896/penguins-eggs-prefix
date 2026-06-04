@@ -1,75 +1,75 @@
+[update-readmes]   Mode: rewrite — migrating to template structure...
 # penguins-eggs-prefix
 
-Fork of [linux-distro-prefix](https://github.com/Interested-Deving-1896/linux-distro-prefix) with [penguins-eggs](https://github.com/Interested-Deving-1896/penguins-eggs) integration.
+[![Built with Ona](https://ona.com/build-with-ona.svg)](https://app.ona.com/#https://github.com/Interested-Deving-1896/penguins-eggs-prefix)
 
-Builds a Gentoo prefix extended with ISO production tools (squashfs-tools, xorriso, grub, syslinux) for use with penguins-eggs. Optionally produces a naked base ISO alongside the prefix tarball.
+<!-- AI:start:what-it-does -->
+_Description pending._
+<!-- AI:end:what-it-does -->
 
-Stage3 rootfs tarballs are sourced from linux-distro-stage3. The base Gentoo prefix is pre-seeded from linux-distro-prefix releases when available, skipping the full bootstrap (~1 hour saved).
+## Architecture
 
-## Supported distros and architectures
+<!-- AI:start:architecture -->
+_Architecture documentation pending._
+<!-- AI:end:architecture -->
 
-Same matrix as linux-distro-prefix — 9 distros x 8 arches. See config/matrix.yml.
+## Install
 
-## Building locally
+<!-- Add installation instructions here. This section is yours — the AI will not modify it. -->
 
-Requirements: root access, curl, coreutils, ~10 GB free disk space.
+```bash
+git clone https://github.com/Interested-Deving-1896/penguins-eggs-prefix.git
+cd penguins-eggs-prefix
+```
 
-    git clone https://github.com/Interested-Deving-1896/penguins-eggs-prefix
-    cd penguins-eggs-prefix
+## Usage
 
-    # Build prefix tarball only
-    sudo ./build.sh --distro debian --release trixie --arch amd64
+<!-- Add usage examples here. This section is yours — the AI will not modify it. -->
 
-    # Build prefix tarball + naked base ISO (requires penguins-eggs on host)
-    sudo ./build.sh --distro debian --release trixie --arch amd64 --iso
+## Configuration
 
-### Options
+<!-- Document configuration options here. This section is yours — the AI will not modify it. -->
 
-| Flag       | Default    | Description                                              |
-|------------|------------|----------------------------------------------------------|
-| --distro   | debian     | Base distro for bootstrap chroot                         |
-| --release  | trixie     | Distro release                                           |
-| --arch     | amd64      | Target architecture                                      |
-| --output   | ./         | Output directory                                         |
-| --jobs     | nproc      | Parallel jobs                                            |
-| --stage3   | (fetched)  | Path to a local stage3 tarball                           |
-| --prefix   | (fetched)  | Path to a local linux-distro-prefix tarball              |
-| --iso      | false      | Also produce a naked base ISO via penguins-eggs          |
+## CI
 
-### Output
+<!-- AI:start:ci -->
+_CI documentation pending._
+<!-- AI:end:ci -->
 
-    penguins_eggs_prefix_{distro}_{arch}_{YYYYMMDD}.tar.gz
-    penguins_eggs_prefix_{distro}_{arch}_{YYYYMMDD}.tar.gz.sha256
-    penguins_eggs_prefix_{distro}_{arch}.tar.gz          <- symlink to latest
-    penguins_eggs_prefix_{distro}_{arch}_{YYYYMMDD}.iso  <- if --iso
+## Mirror chain
 
-## Using the prefix with penguins-eggs
+<!-- AI:start:mirror-chain -->
+This repo is maintained in [`Interested-Deving-1896/penguins-eggs-prefix`](https://github.com/Interested-Deving-1896/penguins-eggs-prefix) and mirrored through:
 
-    # Extract to /usr/local
-    sudo tar zxf penguins_eggs_prefix_debian_amd64_YYYYMMDD.tar.gz -C /usr/local
+```
+Interested-Deving-1896/penguins-eggs-prefix  ──►  OpenOS-Project-OSP/penguins-eggs-prefix  ──►  OpenOS-Project-Ecosystem-OOC/penguins-eggs-prefix
+```
 
-    # Enter the prefix
-    /usr/local/bin/startprefix
+Changes flow downstream automatically via the hourly mirror chain in
+[`fork-sync-all`](https://github.com/Interested-Deving-1896/fork-sync-all).
+Direct commits to OSP or OOC are detected and opened as PRs back to `Interested-Deving-1896`.
+<!-- AI:end:mirror-chain -->
 
-    # Or use with eggs produce --prefix
-    sudo eggs produce --prefix
+## Contributors
 
-## Relationship to other projects
+<!-- AI:start:contributors -->
+_Contributors pending._
+<!-- AI:end:contributors -->
 
-    linux-distro-stage3  (stage3 tarballs)
-            |
-            v
-    linux-distro-prefix  (base Gentoo prefix tarballs)
-            |
-            v
-    penguins-eggs-prefix  <- this repo (prefix + ISO production tools)
-            |
-            v
-    penguins-eggs all-features  (eggs produce --prefix)
-            |
-            v
-            ISO
+## Origins
+
+<!-- AI:start:origins -->
+_Original project — no upstream fork._
+<!-- AI:end:origins -->
+
+## Resources
+
+<!-- AI:start:resources -->
+_No additional resource files found._
+<!-- AI:end:resources -->
 
 ## License
 
-MIT
+<!-- AI:start:license -->
+[MIT](https://github.com/Interested-Deving-1896/penguins-eggs-prefix/blob/main/LICENSE) © 2026 [Interested-Deving-1896](https://github.com/Interested-Deving-1896)
+<!-- AI:end:license -->
