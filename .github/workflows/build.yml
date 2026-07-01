@@ -81,6 +81,9 @@ jobs:
 
       - uses: actions/checkout@v6
 
+      - name: Make build.sh executable
+        run: chmod +x ./build.sh
+
       - name: Build prefix
         env:
           BUILD_ISO: ${{ github.event.inputs.build_iso || 'false' }}
