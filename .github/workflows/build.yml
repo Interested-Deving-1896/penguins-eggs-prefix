@@ -96,6 +96,8 @@ jobs:
             --arch    "${{ matrix.arch }}" \
             --jobs    "$(nproc)" \
             $ISO_FLAG
+        permissions:
+          sudo: true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6
