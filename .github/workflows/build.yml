@@ -97,7 +97,7 @@ jobs:
             --jobs    "$(nproc)" \
             $ISO_FLAG
         permissions:
-          sudo: true
+          run: write
 
       - name: Upload artifact
         uses: actions/upload-artifact@v6
